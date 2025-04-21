@@ -1,40 +1,9 @@
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
-const nodemailer = require("nodemailer");
 const { generateToken } = require("../utils/tokenGenerator");
-
-const generateOtp = () => {
-  const otpContainer = [];
-  for (let i = 0; i < 5; i++) {
-    otpContainer.push(Math.floor(Math.random() * 9));
-  }
-  let otp = otpContainer.join("");
-  return parseInt(otp);
-};
-
-const mailer = (email, otp, message) => {
-  const transporter = nodemailer.createTransport({
-    service: "Gmail",
-    auth: {
-      user: process.env.NODEMAILER_MAIL,
-      pass: process.env.NODEMAILER_PASSCODE,
-    },
-  });
-  const mailOptions = {
-    from: process.env.NODEMAILER_MAIL,
-    to: `${email}`,
-    subject: `${message}`,
-    text: "ChatApp Email Verification",
-    html: emailTemplate(otp, message),
-  };
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.error("Error sending email: ", error);
-    } else {
-      console.log("Email sent: ", info.response);
-    }
-  });
-};
+const { generateOtp } = require("../utils/generateOtp");
+const { mailer } = require("../utils/sendMail");
+const { emailTemplate } = require("../template/emailTemplate");
 
 exports.signUpController = async (req, res) => {
   try {
@@ -64,10 +33,44 @@ exports.signUpController = async (req, res) => {
     res.cookie("token", generateToken(newUser._id, newUser.role), {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
+      sameSite: "Strict",
+      secure: false,
     });
+    mailer(
+      newUser.email,
+      "ChatApp Email Verification",
+      emailTemplate(newUser.otp, "ChatApp Email Verification")
+    );
     return res.status(201).json({ message: "Registered successfully." });
   } catch (error) {
     console.error("Signup error:", error);
     return res.status(500).json({ message: "Something went wrong." });
   }
+};
+
+exports.verifyOtp = async (req, res) => {
+  try {
+    const { id } = req.user;
+    const { otp } = req.body;
+    const findUser = await User.findOne({ _id: id });
+    if (findUser.otp === otp) {
+      findUser.otp = null;
+      findUser.isUser = true;
+      await findUser.save();
+      res.clearCookie("token", {
+        httpOnly: true,
+        secure: false,
+        sameSite: "Strict",
+      });
+      return res.status(200).json({ message: "Email Verified." });
+    } else {
+      return res.status(400).json({ message: "Invalid Otp." });
+    }
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+};
+
+exports.loginController = async (req, res) => {
+  const {} = req.body;
 };
