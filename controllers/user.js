@@ -107,9 +107,9 @@ exports.loginController = async (req, res) => {
         if (comparePassword) {
             res.cookie('token', generateToken(findUser._id, findUser.role), {
                 httpOnly: true,
-                maxAge: 24 * 60 * 60 * 1000,
+                maxAge: 24 * 60 * 60 * 1000, 
                 sameSite: 'None',
-                secure: false,
+                secure: true, 
             });
             console.log(comparePassword);
             return res.status(200).json({ message: 'Login Sucessfully.' });
