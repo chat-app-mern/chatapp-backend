@@ -111,6 +111,7 @@ exports.loginController = async (req, res) => {
                 sameSite: 'None',
                 secure: false,
             });
+            console.log(comparePassword);
             return res.status(200).json({ message: 'Login Sucessfully.' });
         } else {
             return res
