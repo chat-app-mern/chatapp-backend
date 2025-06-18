@@ -32,7 +32,7 @@ exports.signUpController = async (req, res) => {
     });
     res.cookie("token", generateToken(newUser._id, newUser.role), {
       httpOnly: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: 24 * 60 * 60 * 1000,
       sameSite: "Strict",
       secure: false,
     });
@@ -72,5 +72,53 @@ exports.verifyOtp = async (req, res) => {
 };
 
 exports.loginController = async (req, res) => {
-  const {} = req.body;
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return next(new CustomError("Please provide valid details.", 400));
+  }
+  const findUser = await User.findOne({ email });
+  if (findUser) {
+    if (findUser?.isUser === false) {
+      return res.status(401).json({ message: "Email not verified." });
+    }
+    if (findUser?.userStatus === false) {
+      return res.status(400).json({
+        message: "Your account is deactivated please contact to admin.",
+      });
+    }
+    const comparePassword = await bcrypt.compare(password, findUser.password);
+    if (comparePassword) {
+      res.cookie("token", generateToken(findUser._id, findUser.role), {
+        httpOnly: true,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        sameSite: "Strict",
+        secure: false,
+      });
+      return res.status(200).json({ message: "Login Sucessfully." });
+    } else {
+      return res
+        .status(400)
+        .json({ message: "Please enter valid credentials." });
+    }
+  } else {
+    return res.status(401).json({ message: "User not found." });
+  }
+};
+exports.veriFyToken = (req, res) => {
+  let token;
+  if (req.cookies && req.cookies.token) {
+    token = req.cookies.token;
+  }
+  if (!token) {
+    return res.status(400).json({ success: false, message: 'Token is required.' });
+  }
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret) {
+    return res.status(400).json({ success: false, message: 'Please provide jwt secret key.' });
+  }
+  try {
+    return res.status(200).json({success: true,message:'Valid User'});
+  } catch (error) {
+    return res.status(401).json({ success: false, message: 'Unauthorized user' });
+  }
 };
