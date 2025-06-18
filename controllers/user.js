@@ -105,14 +105,15 @@ exports.loginController = async (req, res) => {
             findUser.password
         );
         if (comparePassword) {
-            res.cookie('token', generateToken(findUser._id, findUser.role), {
-                httpOnly: true,
-                maxAge: 24 * 60 * 60 * 1000, 
-                sameSite: 'None',
-                secure: true, 
-            });
-            console.log(comparePassword);
-            return res.status(200).json({ message: 'Login Sucessfully.' });
+            return res
+                .cookie('token', generateToken(findUser._id, findUser.role), {
+                    httpOnly: true,
+                    maxAge: 24 * 60 * 60 * 1000,
+                    sameSite: 'None',
+                    secure: true,
+                })
+                .status(200)
+                .json({ message: 'Login Sucessfully.' });
         } else {
             return res
                 .status(400)
