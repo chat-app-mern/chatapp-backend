@@ -47,8 +47,8 @@ exports.signUpController = async (req, res) => {
         res.cookie('token', generateToken(newUser._id, newUser.role), {
             httpOnly: true,
             maxAge: 24 * 60 * 60 * 1000,
-            sameSite: 'Strict',
-            secure: false,
+            sameSite: 'strict',
+            secure: true,
         });
         mailer(
             newUser.email,
@@ -73,8 +73,9 @@ exports.verifyOtp = async (req, res) => {
             await findUser.save();
             res.clearCookie('token', {
                 httpOnly: true,
-                secure: false,
-                sameSite: 'Lax',
+                maxAge: 24 * 60 * 60 * 1000,
+                sameSite: 'strict',
+                secure: true,
             });
             return res.status(200).json({ message: 'Email Verified.' });
         } else {
