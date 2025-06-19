@@ -109,7 +109,7 @@ exports.loginController = async (req, res) => {
                 .cookie('token', generateToken(findUser._id, findUser.role), {
                     httpOnly: true,
                     maxAge: 24 * 60 * 60 * 1000,
-                    sameSite: 'Lax',
+                    sameSite: 'None',
                     secure: true,
                 })
                 .status(200)
