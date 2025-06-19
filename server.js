@@ -11,7 +11,7 @@ const app = express();
 connectDb();
 
 const corsOptions = {
-    origin: 'http://localhost:3000',
+    origin: 'https://user-management-system-nine-omega.vercel.app',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
