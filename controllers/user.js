@@ -74,7 +74,7 @@ exports.verifyOtp = async (req, res) => {
             res.clearCookie('token', {
                 httpOnly: true,
                 secure: false,
-                sameSite: 'Strict',
+                sameSite: 'Lax',
             });
             return res.status(200).json({ message: 'Email Verified.' });
         } else {
@@ -109,7 +109,7 @@ exports.loginController = async (req, res) => {
                 .cookie('token', generateToken(findUser._id, findUser.role), {
                     httpOnly: true,
                     maxAge: 24 * 60 * 60 * 1000,
-                    sameSite: 'None',
+                    sameSite: 'Lax',
                     secure: true,
                 })
                 .status(200)
