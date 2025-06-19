@@ -113,7 +113,7 @@ exports.loginController = async (req, res) => {
                     secure: true,
                 })
                 .status(200)
-                .json({ message: 'Login Sucessfully.' });
+                .json({ message: 'Login Successfully.' });
         } else {
             return res
                 .status(400)
